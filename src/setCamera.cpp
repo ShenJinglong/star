@@ -1,4 +1,4 @@
-#include "stdafx.h"
+
 #include <opencv2/opencv.hpp>
 #include "setCamera.hpp"
 
@@ -7,7 +7,7 @@
 
 bool cameraDriver::openCamera(cv::VideoCapture &capture)
 {
-	std::string xmlAddress = "camera.xml";
+	std::string xmlAddress = "conf/camera.xml";
 	cv::FileStorage fs("camera.xml", cv::FileStorage::READ);
 	if (!fs.isOpened())
 		std::cout << "Can't open [" << xmlAddress << "], please check if the file is exist.";
