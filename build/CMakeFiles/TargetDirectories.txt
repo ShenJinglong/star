@@ -1,0 +1,5 @@
+/home/sjinglong/Test/star/build/CMakeFiles/edit_cache.dir
+/home/sjinglong/Test/star/build/CMakeFiles/rebuild_cache.dir
+/home/sjinglong/Test/star/build/src/CMakeFiles/rebuild_cache.dir
+/home/sjinglong/Test/star/build/src/CMakeFiles/edit_cache.dir
+/home/sjinglong/Test/star/build/src/CMakeFiles/star.dir

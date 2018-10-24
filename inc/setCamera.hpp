@@ -10,7 +10,9 @@ public:
 	cv::Mat camera_matrix;
 	cv::Mat dist_coeffs;
 private:
-	int usb_cam_id;
+	void setExposureTime(std::string camID, int val);
+private:
+	std::string usb_cam_id;
 	int exposure_time;
 	std::string video_path;
 };
