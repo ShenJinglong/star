@@ -7,7 +7,8 @@ class cubedetector
 public:
 	void findCube(const cv::Mat &src, std::vector<cv::RotatedRect> &RRect_previous_v);
 	void filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, std::vector<cv::RotatedRect> &RRect_result_v);
-	void drawResult(cv::Mat &frame, std::vector<cv::RotatedRect> &RRects);
+	void drawResult(cv::Mat &frame, std::vector<cv::RotatedRect> &RRects, std::vector<double> &angleSolverResult);
+	void calcBoundingRect(std::vector<cv::RotatedRect> &RRect_result_v);
 public:
 	cv::Rect2f targetRect;
 private:

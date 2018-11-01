@@ -22,9 +22,12 @@ void cubedetector::findCube(const cv::Mat &src, std::vector<cv::RotatedRect> &RR
 		cv::RotatedRect RRect = cv::minAreaRect(contours[i]);
 		float ratio_cur = RRect.size.width / RRect.size.height;
 		float angle = RRect.angle;
+		float RRect_area = RRect.size.area();
+		float contour_area = cv::contourArea(contours[i]);
 		if (ratio_cur > 0.8 && ratio_cur < 1.2 &&
 			(angle > -20 || angle < -70) &&
-			RRect.size.width > 20 && RRect.size.width < frame.cols / 5)
+			RRect.size.width > 20 && RRect.size.width < frame.cols / 5 &&
+			RRect_area / contour_area <= 1.5)
 		{
 			RRect_previous_v.push_back(RRect);
 		}
@@ -70,19 +73,7 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 			dist_center.push_back(std::make_pair(dist_map[center_idx][j], j));
 		}
 
-		for (int j = 0; j < RRect_previous_v.size(); ++j)
-		{
-			std::cout << dist_center[j].first << " " << dist_center[j].second << "\t";
-		}
-		std::cout << std::endl;
-
 		std::sort(dist_center.begin(), dist_center.end(), [](const std::pair<float, int> &p1, const std::pair<float, int> &p2) {return p1.first < p2.first;});
-
-		for (int j = 0; j < RRect_previous_v.size(); ++j)
-		{
-			std::cout << dist_center[j].first << " " << dist_center[j].second << "\t";
-		}
-		std::cout << std::endl;
 
 		for (int i = 0; i < 9; ++i)
 		{
@@ -100,7 +91,7 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 
 }
 
-void cubedetector::drawResult(cv::Mat &frame, std::vector<cv::RotatedRect> &RRects)
+void cubedetector::drawResult(cv::Mat &frame, std::vector<cv::RotatedRect> &RRects, std::vector<double> &angleSolverResult)
 {
 #ifdef DEBUG
 	int counter = 0;
@@ -110,17 +101,42 @@ void cubedetector::drawResult(cv::Mat &frame, std::vector<cv::RotatedRect> &RRec
 		RRect_single.points(points_);
 		for (int i = 0; i < 4; ++i)
 		{
-			line(frame, points_[i], points_[(i + 1) % 4], cv::Scalar(0, 0, 255), 3, 2);
+			line(frame, points_[i], points_[(i + 1) % 4], cv::Scalar(0, 0, 255), 2, 2);
 		}
 		++counter;
-		cv::putText(frame, std::to_string(counter), points_[0], CV_FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 3);
+		cv::putText(frame, std::to_string(counter), points_[0], CV_FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 	}
 #endif
-	float boundingRectWidth = 0;
+	cv::rectangle(frame, targetRect, cv::Scalar(0, 0, 255), 2);
+	std::string str = "Yaw: ";
+	str += std::to_string(angleSolverResult[0]);
+	str += ", Pitch: ";
+	str += std::to_string(angleSolverResult[1]);
+	str += ", Distance: ";
+	str += std::to_string(angleSolverResult[2]);
+	cv::putText(frame, str, cv::Point(targetRect.x, targetRect.y), CV_FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+}
+
+void cubedetector::calcBoundingRect(std::vector<cv::RotatedRect> &RRect_result_v)
+{
+	float boundingRectWidth = 0, center_x = 0, center_y = 0;
 	std::vector<double> widths;
-	for (auto &RRect_single : RRects)
+	for (auto &RRect_single : RRect_result_v)
 	{
 		widths.push_back(RRect_single.size.width);
+		center_x += RRect_single.center.x;
+		center_y += RRect_single.center.y;
 	}
-	
+	std::sort(widths.begin(), widths.end());
+	widths.pop_back();
+	widths.erase(widths.begin());
+	for (int i = 0; i < widths.size(); ++i)
+	{
+		boundingRectWidth += widths[i];
+	}
+	boundingRectWidth /= widths.size();
+	boundingRectWidth *= 3;
+	center_x /= RRect_result_v.size();
+	center_y /= RRect_result_v.size();
+	targetRect = cv::Rect(center_x - boundingRectWidth / 2, center_y - boundingRectWidth / 2, boundingRectWidth, boundingRectWidth);
 }

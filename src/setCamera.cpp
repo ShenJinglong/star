@@ -18,15 +18,19 @@ bool cameraDriver::openCamera(cv::VideoCapture &capture)
 	std::string xmlAddress = "../conf/camera.xml";
 	cv::FileStorage fs(xmlAddress, cv::FileStorage::READ);
 	if (!fs.isOpened())
-		std::cout << "Can't open [" << xmlAddress << "], please check if the file is exist.";
+	{
+		std::cout << "openCamera: Can't open [" << xmlAddress << "], please check if the file is exist.";
+		return false;
+	}
 	fs["cam_id"] >> usb_cam_id;
 	fs["video_path"] >> video_path;
 	fs["exposure_time"] >> exposure_time;
 	fs["Camera_Matrix"] >> camera_matrix;
 	fs["Distortion_Coefficients"] >> dist_coeffs;
+	fs.release();
 
 #ifdef DEBUG
-	std::cout << usb_cam_id << std::endl;
+	std::cout << "Open config file successful..." << std::endl;
 #endif
 
 	capture.set(CV_CAP_PROP_FPS, 120);
@@ -40,7 +44,7 @@ bool cameraDriver::openCamera(cv::VideoCapture &capture)
 	capture.set(CV_CAP_PROP_FOURCC, CV_FOURCC('M', 'J', 'P', 'G'));
 	capture.set(CV_CAP_PROP_FRAME_WIDTH, 640);
 	capture.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-	capture.set(CV_CAP_PROP_EXPOSURE, exposure_time);
+
 	setExposureTime(usb_cam_id, exposure_time);
 
 #ifndef USE_VIDEO
@@ -56,6 +60,11 @@ bool cameraDriver::openCamera(cv::VideoCapture &capture)
 		return false;
 	}
 #endif
+
+#ifdef DEBUG
+	std::cout << "open camera successful..." << std::endl;
+#endif
+
 	return true;
 }
 

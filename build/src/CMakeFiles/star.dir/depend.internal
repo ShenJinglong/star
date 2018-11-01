@@ -406,6 +406,7 @@ src/CMakeFiles/star.dir/star.cpp.o
  ../inc/vision_mul.hpp
  /home/sjinglong/Test/star/src/star.cpp
 src/CMakeFiles/star.dir/vision_mul.cpp.o
+ ../inc/angleSolver.hpp
  ../inc/getCube.hpp
  ../inc/setCamera.hpp
  /home/sjinglong/Test/star/src/vision_mul.cpp

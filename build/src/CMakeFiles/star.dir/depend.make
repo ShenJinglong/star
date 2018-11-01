@@ -405,6 +405,7 @@ src/CMakeFiles/star.dir/setCamera.cpp.o: /usr/local/include/opencv2/xfeatures2d/
 src/CMakeFiles/star.dir/star.cpp.o: ../inc/vision_mul.hpp
 src/CMakeFiles/star.dir/star.cpp.o: ../src/star.cpp
 
+src/CMakeFiles/star.dir/vision_mul.cpp.o: ../inc/angleSolver.hpp
 src/CMakeFiles/star.dir/vision_mul.cpp.o: ../inc/getCube.hpp
 src/CMakeFiles/star.dir/vision_mul.cpp.o: ../inc/setCamera.hpp
 src/CMakeFiles/star.dir/vision_mul.cpp.o: ../src/vision_mul.cpp
