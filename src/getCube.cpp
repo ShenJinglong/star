@@ -1,6 +1,7 @@
 
 #include <opencv2/opencv.hpp>
 #include "getCube.hpp"
+#include <algorithm>
 
 #define DEBUG
 
@@ -20,14 +21,14 @@ void cubedetector::findCube(const cv::Mat &src, std::vector<cv::RotatedRect> &RR
 	for (size_t i = 0; i < contours.size(); ++i)
 	{
 		cv::RotatedRect RRect = cv::minAreaRect(contours[i]);
+		adjustRRect(RRect);
 		float ratio_cur = RRect.size.width / RRect.size.height;
 		float angle = RRect.angle;
 		float RRect_area = RRect.size.area();
 		float contour_area = cv::contourArea(contours[i]);
 		if (ratio_cur > 0.8 && ratio_cur < 1.2 &&
-			(angle > -20 || angle < -70) &&
-			RRect.size.width > 20 && RRect.size.width < frame.cols / 5 &&
-			RRect_area / contour_area <= 1.5)
+			angle > -20 && angle < 20 &&
+			RRect.size.width > 10 && RRect.size.width < frame.cols / 5)
 		{
 			RRect_previous_v.push_back(RRect);
 		}
@@ -38,6 +39,12 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 {
 	if (RRect_previous_v.size() <= 15 && RRect_previous_v.size() > 9)
 	{
+
+#ifdef DEBUG
+		std::cout << "before noise reduction: " << RRect_previous_v.size();
+#endif
+
+		noiseReduction(RRect_previous_v, 5);
 		float dist_map[15][15] = { 0 };
 
 		for (int i = 0; i < RRect_previous_v.size(); ++i)
@@ -74,10 +81,19 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 		}
 
 		std::sort(dist_center.begin(), dist_center.end(), [](const std::pair<float, int> &p1, const std::pair<float, int> &p2) {return p1.first < p2.first;});
-
-		for (int i = 0; i < 9; ++i)
+		if (RRect_previous_v.size() >= 9)
 		{
-			RRect_result_v.push_back(RRect_previous_v[dist_center[i].second]);
+			for (int i = 0; i < 9; ++i)
+			{
+				RRect_result_v.push_back(RRect_previous_v[dist_center[i].second]);
+			}
+		}
+		else
+		{
+			for (int i = 0; i < RRect_previous_v.size(); ++i)
+			{
+				RRect_result_v.push_back(RRect_previous_v[dist_center[i].second]);
+			}
 		}
 	}
 	else
@@ -86,7 +102,7 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 	}
 
 #ifdef DEBUG
-	std::cout << "Before filter: " << RRect_previous_v.size() << "\tAfter filter: " << RRect_result_v.size() << std::endl;
+	std::cout << "\tBefore filter: " << RRect_previous_v.size() << "\tAfter filter: " << RRect_result_v.size() << std::endl;
 #endif
 
 }
@@ -107,7 +123,7 @@ void cubedetector::drawResult(cv::Mat &frame, std::vector<cv::RotatedRect> &RRec
 		cv::putText(frame, std::to_string(counter), points_[0], CV_FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 	}
 #endif
-	cv::rectangle(frame, targetRect, cv::Scalar(0, 0, 255), 2);
+	cv::rectangle(frame, targetRect, cv::Scalar(0, 255, 255), 2);
 	std::string str = "Yaw: ";
 	str += std::to_string(angleSolverResult[0]);
 	str += ", Pitch: ";
@@ -139,4 +155,80 @@ void cubedetector::calcBoundingRect(std::vector<cv::RotatedRect> &RRect_result_v
 	center_x /= RRect_result_v.size();
 	center_y /= RRect_result_v.size();
 	targetRect = cv::Rect(center_x - boundingRectWidth / 2, center_y - boundingRectWidth / 2, boundingRectWidth, boundingRectWidth);
+}
+
+void cubedetector::adjustRRect(cv::RotatedRect &RRect)
+{
+	if (RRect.angle < -45)
+	{
+		float temp = 0;
+		temp = RRect.size.width;
+		RRect.size.width = RRect.size.height;
+		RRect.size.height = temp;
+		RRect.angle += 90;
+	}
+}
+
+void cubedetector::subNoiseReduction(const std::vector<cv::RotatedRect> &_data_v, std::vector<cv::RotatedRect> &result_v, int val)
+{
+	std::vector<cv::RotatedRect> data_v = _data_v;
+	float cur_result = 0, sub_result = 0;
+	std::vector<float> width_v;
+
+	for (int i = 0; i < data_v.size(); ++i)
+	{
+		width_v.push_back(data_v[i].size.width);
+	}
+
+	cur_result = calcVariance(width_v.begin(), width_v.end());
+	if (cur_result < val)
+	{
+		result_v = data_v;
+		return;
+	}
+	else
+	{
+		sub_result = calcVariance(width_v.begin() + 1, width_v.end());
+		if (sub_result < cur_result)
+		{
+			std::vector<cv::RotatedRect> temp(data_v.begin() + 1, data_v.end());
+			subNoiseReduction(temp, result_v, val);
+		}
+		else
+		{
+			result_v = data_v;
+		}
+	}
+	return;
+}
+
+float cubedetector::calcVariance(const std::vector<float>::iterator &begin, const std::vector<float>::iterator &end)
+{
+	std::vector<float>::iterator _begin = begin;
+	float sum = 0, count = 0, ave = 0;
+	while (_begin != end)
+	{
+		sum += *_begin;
+		++_begin;
+		++count;
+	}
+	ave = sum / count;
+	_begin = begin;
+	sum = 0;
+	while (_begin != end)
+	{
+		sum += (*_begin - ave) * (*_begin - ave);
+		++_begin;
+	}
+	return sum / count;
+}
+
+void cubedetector::noiseReduction(std::vector<cv::RotatedRect> &RRect_v, int val)
+{
+	std::sort(RRect_v.begin(), RRect_v.end(), [](const cv::RotatedRect &rect1, const cv::RotatedRect &rect2){return rect1.size.width < rect2.size.width;});
+	subNoiseReduction(RRect_v, RRect_v, val);
+	std::reverse(RRect_v.begin(), RRect_v.end());
+	subNoiseReduction(RRect_v, RRect_v, val);
+	std::reverse(RRect_v.begin(), RRect_v.end());
+	subNoiseReduction(RRect_v, RRect_v, val);
 }
