@@ -41,59 +41,79 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 	{
 
 #ifdef DEBUG
-		std::cout << "before noise reduction: " << RRect_previous_v.size();
+		std::cout << "width: " << RRect_previous_v.size();
 #endif
 
-		noiseReduction(RRect_previous_v, 5);
-		float dist_map[15][15] = { 0 };
+		noiseReduction(RRect_previous_v, 5, "width");
 
-		for (int i = 0; i < RRect_previous_v.size(); ++i)
-		{
-			for (int j = i + 1; j < RRect_previous_v.size(); ++j)
-			{
-				float d = (RRect_previous_v[i].center.x - RRect_previous_v[j].center.x)*(RRect_previous_v[i].center.x - RRect_previous_v[j].center.x) + 
-					(RRect_previous_v[i].center.y - RRect_previous_v[j].center.y) * (RRect_previous_v[i].center.y - RRect_previous_v[j].center.y);
-				dist_map[i][j] = d;
-				dist_map[j][i] = d;
-			}
-		}
+#ifdef DEBUG
+		std::cout << "\tangle: " << RRect_previous_v.size();
+#endif
 
-		int center_idx = 0;
-		float min_dist = 100000000;
-		for (int i = 0; i < RRect_previous_v.size(); ++i)
+		noiseReduction(RRect_previous_v, 3, "angle");
+
+#ifdef DEBUG
+		std::cout << "\tx: " << RRect_previous_v.size();
+#endif
+
+		noiseReduction(RRect_previous_v, (3500/42)*RRect_previous_v[0].size.width-35000/42, "x");
+
+		if (RRect_previous_v.size() > 9)
 		{
-			float cur_d = 0;
-			for (int j = 0; j < RRect_previous_v.size(); ++j)
+			float dist_map[15][15] = { 0 };
+
+			for (int i = 0; i < RRect_previous_v.size(); ++i)
 			{
-				cur_d += dist_map[i][j];
-				if (cur_d < min_dist)
+				for (int j = i + 1; j < RRect_previous_v.size(); ++j)
 				{
-					min_dist = cur_d;
-					center_idx = i;
+					float d = (RRect_previous_v[i].center.x - RRect_previous_v[j].center.x)*(RRect_previous_v[i].center.x - RRect_previous_v[j].center.x) + 
+						(RRect_previous_v[i].center.y - RRect_previous_v[j].center.y) * (RRect_previous_v[i].center.y - RRect_previous_v[j].center.y);
+					dist_map[i][j] = d;
+					dist_map[j][i] = d;
 				}
 			}
-		}
 
-		std::vector<std::pair<float, int> > dist_center;
-		for (int j = 0; j < RRect_previous_v.size(); ++j)
-		{
-			dist_center.push_back(std::make_pair(dist_map[center_idx][j], j));
-		}
-
-		std::sort(dist_center.begin(), dist_center.end(), [](const std::pair<float, int> &p1, const std::pair<float, int> &p2) {return p1.first < p2.first;});
-		if (RRect_previous_v.size() >= 9)
-		{
-			for (int i = 0; i < 9; ++i)
+			int center_idx = 0;
+			float min_dist = 100000000;
+			for (int i = 0; i < RRect_previous_v.size(); ++i)
 			{
-				RRect_result_v.push_back(RRect_previous_v[dist_center[i].second]);
+				float cur_d = 0;
+				for (int j = 0; j < RRect_previous_v.size(); ++j)
+				{
+					cur_d += dist_map[i][j];
+					if (cur_d < min_dist)
+					{
+						min_dist = cur_d;
+						center_idx = i;
+					}
+				}
+			}
+
+			std::vector<std::pair<float, int> > dist_center;
+			for (int j = 0; j < RRect_previous_v.size(); ++j)
+			{
+				dist_center.push_back(std::make_pair(dist_map[center_idx][j], j));
+			}
+
+			std::sort(dist_center.begin(), dist_center.end(), [](const std::pair<float, int> &p1, const std::pair<float, int> &p2) {return p1.first < p2.first;});
+			if (RRect_previous_v.size() >= 9)
+			{
+				for (int i = 0; i < 9; ++i)
+				{
+					RRect_result_v.push_back(RRect_previous_v[dist_center[i].second]);
+				}
+			}
+			else
+			{
+				for (int i = 0; i < RRect_previous_v.size(); ++i)
+				{
+					RRect_result_v.push_back(RRect_previous_v[dist_center[i].second]);
+				}
 			}
 		}
 		else
 		{
-			for (int i = 0; i < RRect_previous_v.size(); ++i)
-			{
-				RRect_result_v.push_back(RRect_previous_v[dist_center[i].second]);
-			}
+			RRect_result_v = RRect_previous_v;
 		}
 	}
 	else
@@ -169,18 +189,43 @@ void cubedetector::adjustRRect(cv::RotatedRect &RRect)
 	}
 }
 
-void cubedetector::subNoiseReduction(const std::vector<cv::RotatedRect> &_data_v, std::vector<cv::RotatedRect> &result_v, int val)
+void cubedetector::subNoiseReduction(const std::vector<cv::RotatedRect> &_data_v, std::vector<cv::RotatedRect> &result_v, int val, std::string type)
 {
 	std::vector<cv::RotatedRect> data_v = _data_v;
 	float cur_result = 0, sub_result = 0;
-	std::vector<float> width_v;
+	std::vector<float> num_v;
 
-	for (int i = 0; i < data_v.size(); ++i)
+	if (type == "width")
 	{
-		width_v.push_back(data_v[i].size.width);
+		for (int i = 0; i < data_v.size(); ++i)
+		{
+			num_v.push_back(data_v[i].size.width);
+		}
+	}
+	else if (type == "x")
+	{
+		for (int i = 0; i < data_v.size(); ++i)
+		{
+			num_v.push_back(data_v[i].center.x);
+		}
+	}
+	else if (type == "y")
+	{
+		for (int i = 0; i < data_v.size(); ++i)
+		{
+			num_v.push_back(data_v[i].center.y);
+		}
+	}
+	else if (type == "angle")
+	{
+		for (int i = 0; i < data_v.size(); ++i)
+		{
+			num_v.push_back(data_v[i].angle);
+		}
 	}
 
-	cur_result = calcVariance(width_v.begin(), width_v.end());
+	cur_result = calcVariance(num_v.begin(), num_v.end());
+
 	if (cur_result < val)
 	{
 		result_v = data_v;
@@ -188,11 +233,11 @@ void cubedetector::subNoiseReduction(const std::vector<cv::RotatedRect> &_data_v
 	}
 	else
 	{
-		sub_result = calcVariance(width_v.begin() + 1, width_v.end());
+		sub_result = calcVariance(num_v.begin() + 1, num_v.end());
 		if (sub_result < cur_result)
 		{
 			std::vector<cv::RotatedRect> temp(data_v.begin() + 1, data_v.end());
-			subNoiseReduction(temp, result_v, val);
+			subNoiseReduction(temp, result_v, val, type);
 		}
 		else
 		{
@@ -223,12 +268,12 @@ float cubedetector::calcVariance(const std::vector<float>::iterator &begin, cons
 	return sum / count;
 }
 
-void cubedetector::noiseReduction(std::vector<cv::RotatedRect> &RRect_v, int val)
+void cubedetector::noiseReduction(std::vector<cv::RotatedRect> &RRect_v, int val, std::string type)
 {
 	std::sort(RRect_v.begin(), RRect_v.end(), [](const cv::RotatedRect &rect1, const cv::RotatedRect &rect2){return rect1.size.width < rect2.size.width;});
-	subNoiseReduction(RRect_v, RRect_v, val);
+	subNoiseReduction(RRect_v, RRect_v, val, type);
 	std::reverse(RRect_v.begin(), RRect_v.end());
-	subNoiseReduction(RRect_v, RRect_v, val);
+	subNoiseReduction(RRect_v, RRect_v, val, type);
 	std::reverse(RRect_v.begin(), RRect_v.end());
-	subNoiseReduction(RRect_v, RRect_v, val);
+	subNoiseReduction(RRect_v, RRect_v, val, type);
 }

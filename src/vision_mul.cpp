@@ -4,7 +4,7 @@
 #include "setCamera.hpp"
 #include "angleSolver.hpp"
 
-#define DEBUG
+//#define DEBUG
 
 void vision_mul(void)
 {
@@ -44,7 +44,7 @@ void vision_mul(void)
 	std::cout << "filterCube complete..." << std::endl;
 #endif
 
-		if (RRect_result_v.size() == 9)
+		if (RRect_result_v.size() >= 6)
 		{
 			detector.calcBoundingRect(RRect_result_v);
 
