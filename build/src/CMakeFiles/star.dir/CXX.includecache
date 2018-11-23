@@ -10,6 +10,10 @@
 opencv2/opencv.hpp
 -
 
+../inc/colorRecognition.hpp
+opencv2/opencv.hpp
+-
+
 ../inc/getCube.hpp
 opencv2/opencv.hpp
 -
@@ -25,6 +29,12 @@ opencv2/opencv.hpp
 -
 angleSolver.hpp
 /home/sjinglong/Test/star/src/angleSolver.hpp
+
+/home/sjinglong/Test/star/src/colorRecognition.cpp
+opencv2/opencv.hpp
+-
+colorRecognition.hpp
+/home/sjinglong/Test/star/src/colorRecognition.hpp
 
 /home/sjinglong/Test/star/src/getCube.cpp
 opencv2/opencv.hpp
@@ -44,14 +54,6 @@ fcntl.h
 sys/ioctl.h
 -
 unistd.h
--
-sys/types.h
--
-sys/stat.h
--
-termios.h
--
-errno.h
 -
 linux/videodev2.h
 -
@@ -73,6 +75,8 @@ setCamera.hpp
 /home/sjinglong/Test/star/src/setCamera.hpp
 angleSolver.hpp
 /home/sjinglong/Test/star/src/angleSolver.hpp
+colorRecognition.hpp
+/home/sjinglong/Test/star/src/colorRecognition.hpp
 
 /usr/local/include/opencv/cxcore.h
 opencv2/core/core_c.h

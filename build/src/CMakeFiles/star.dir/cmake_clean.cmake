@@ -5,6 +5,7 @@ file(REMOVE_RECURSE
   "CMakeFiles/star.dir/serial_mul.cpp.o"
   "CMakeFiles/star.dir/setCamera.cpp.o"
   "CMakeFiles/star.dir/vision_mul.cpp.o"
+  "CMakeFiles/star.dir/colorRecognition.cpp.o"
   "../star.pdb"
   "../star"
 )

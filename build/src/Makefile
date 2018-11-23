@@ -152,6 +152,33 @@ angleSolver.cpp.s:
 	cd /home/sjinglong/Test/star/build && $(MAKE) -f src/CMakeFiles/star.dir/build.make src/CMakeFiles/star.dir/angleSolver.cpp.s
 .PHONY : angleSolver.cpp.s
 
+colorRecognition.o: colorRecognition.cpp.o
+
+.PHONY : colorRecognition.o
+
+# target to build an object file
+colorRecognition.cpp.o:
+	cd /home/sjinglong/Test/star/build && $(MAKE) -f src/CMakeFiles/star.dir/build.make src/CMakeFiles/star.dir/colorRecognition.cpp.o
+.PHONY : colorRecognition.cpp.o
+
+colorRecognition.i: colorRecognition.cpp.i
+
+.PHONY : colorRecognition.i
+
+# target to preprocess a source file
+colorRecognition.cpp.i:
+	cd /home/sjinglong/Test/star/build && $(MAKE) -f src/CMakeFiles/star.dir/build.make src/CMakeFiles/star.dir/colorRecognition.cpp.i
+.PHONY : colorRecognition.cpp.i
+
+colorRecognition.s: colorRecognition.cpp.s
+
+.PHONY : colorRecognition.s
+
+# target to generate assembly for a file
+colorRecognition.cpp.s:
+	cd /home/sjinglong/Test/star/build && $(MAKE) -f src/CMakeFiles/star.dir/build.make src/CMakeFiles/star.dir/colorRecognition.cpp.s
+.PHONY : colorRecognition.cpp.s
+
 getCube.o: getCube.cpp.o
 
 .PHONY : getCube.o
@@ -299,6 +326,9 @@ help:
 	@echo "... angleSolver.o"
 	@echo "... angleSolver.i"
 	@echo "... angleSolver.s"
+	@echo "... colorRecognition.o"
+	@echo "... colorRecognition.i"
+	@echo "... colorRecognition.s"
 	@echo "... getCube.o"
 	@echo "... getCube.i"
 	@echo "... getCube.s"

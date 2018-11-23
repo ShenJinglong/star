@@ -15,6 +15,7 @@ add_executable(star
     serial_mul.cpp
     setCamera.cpp
     vision_mul.cpp
+    colorRecognition.cpp
 )
 
 target_include_directories(star

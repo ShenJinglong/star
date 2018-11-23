@@ -3,6 +3,7 @@
 #include "getCube.hpp"
 #include "setCamera.hpp"
 #include "angleSolver.hpp"
+#include "colorRecognition.hpp"
 
 //#define DEBUG
 
@@ -10,6 +11,7 @@ void vision_mul(void)
 {
 	cubedetector detector;
 	cameraDriver camera;
+	colorReco recognizer;
 	cv::VideoCapture capture;
 	cv::Mat frame;
 	std::vector<cv::RotatedRect> RRect_previous_v;
@@ -57,6 +59,15 @@ void vision_mul(void)
 #ifdef DEBUG
 	std::cout << "solveAngle complete..." << std::endl;
 #endif
+
+			if (recognizer.judge(frame, detector.targetRect))
+			{
+
+			}
+			else
+			{
+				
+			}
 
 			detector.drawResult(frame, RRect_result_v, angleSolverResult);
 		}

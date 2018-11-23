@@ -5,6 +5,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
   "/home/sjinglong/Test/star/src/angleSolver.cpp" "/home/sjinglong/Test/star/build/src/CMakeFiles/star.dir/angleSolver.cpp.o"
+  "/home/sjinglong/Test/star/src/colorRecognition.cpp" "/home/sjinglong/Test/star/build/src/CMakeFiles/star.dir/colorRecognition.cpp.o"
   "/home/sjinglong/Test/star/src/getCube.cpp" "/home/sjinglong/Test/star/build/src/CMakeFiles/star.dir/getCube.cpp.o"
   "/home/sjinglong/Test/star/src/serial_mul.cpp" "/home/sjinglong/Test/star/build/src/CMakeFiles/star.dir/serial_mul.cpp.o"
   "/home/sjinglong/Test/star/src/setCamera.cpp" "/home/sjinglong/Test/star/build/src/CMakeFiles/star.dir/setCamera.cpp.o"

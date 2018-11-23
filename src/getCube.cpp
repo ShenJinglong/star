@@ -41,22 +41,45 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 	{
 
 #ifdef DEBUG
-		std::cout << "width: " << RRect_previous_v.size();
+		std::cout << "before: " << RRect_previous_v.size();
 #endif
 
 		noiseReduction(RRect_previous_v, 5, "width");
 
 #ifdef DEBUG
-		std::cout << "\tangle: " << RRect_previous_v.size();
+		std::cout << "  width: " << RRect_previous_v.size();
 #endif
 
 		noiseReduction(RRect_previous_v, 3, "angle");
 
 #ifdef DEBUG
-		std::cout << "\tx: " << RRect_previous_v.size();
+		std::cout << "  angle: " << RRect_previous_v.size();
 #endif
 
-		noiseReduction(RRect_previous_v, (3500/42)*RRect_previous_v[0].size.width-35000/42, "x");
+		if (RRect_previous_v[0].size.width >= 20)
+		{
+			noiseReduction(RRect_previous_v, (3500/42)*RRect_previous_v[0].size.width-3500/3, "x");
+
+#ifdef DEBUG
+		std::cout << "  x: " << RRect_previous_v.size();
+#endif
+
+			noiseReduction(RRect_previous_v, (3500/42)*RRect_previous_v[0].size.width-3500/3, "y");
+
+#ifdef DEBUG
+		std::cout << "  y: " << RRect_previous_v.size();
+#endif
+		}
+
+/*
+		noiseReduction(RRect_previous_v, RRect_previous_v[0].size.width < 20 ? 
+			5*RRect_previous_v[0].size.width*RRect_previous_v[0].size.width-100*RRect_previous_v[0].size.width+500 : 
+			(3500/42)*RRect_previous_v[0].size.width-3500/3, "x");
+
+		noiseReduction(RRect_previous_v, RRect_previous_v[0].size.width < 20 ? 
+			5*RRect_previous_v[0].size.width*RRect_previous_v[0].size.width-100*RRect_previous_v[0].size.width+500 : 
+			(3500/42)*RRect_previous_v[0].size.width-3500/3, "y");
+*/
 
 		if (RRect_previous_v.size() > 9)
 		{
@@ -122,7 +145,7 @@ void cubedetector::filterCube(std::vector<cv::RotatedRect> &RRect_previous_v, st
 	}
 
 #ifdef DEBUG
-	std::cout << "\tBefore filter: " << RRect_previous_v.size() << "\tAfter filter: " << RRect_result_v.size() << std::endl;
+	std::cout << "  Before filter: " << RRect_previous_v.size() << "  After filter: " << RRect_result_v.size() << std::endl;
 #endif
 
 }
@@ -150,7 +173,7 @@ void cubedetector::drawResult(cv::Mat &frame, std::vector<cv::RotatedRect> &RRec
 	str += std::to_string(angleSolverResult[1]);
 	str += ", Distance: ";
 	str += std::to_string(angleSolverResult[2]);
-	cv::putText(frame, str, cv::Point(targetRect.x, targetRect.y), CV_FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
+	cv::putText(frame, str, cv::Point(15, 15), CV_FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 255, 0), 2);
 }
 
 void cubedetector::calcBoundingRect(std::vector<cv::RotatedRect> &RRect_result_v)
@@ -171,7 +194,7 @@ void cubedetector::calcBoundingRect(std::vector<cv::RotatedRect> &RRect_result_v
 		boundingRectWidth += widths[i];
 	}
 	boundingRectWidth /= widths.size();
-	boundingRectWidth *= 3;
+	boundingRectWidth *= 4;
 	center_x /= RRect_result_v.size();
 	center_y /= RRect_result_v.size();
 	targetRect = cv::Rect(center_x - boundingRectWidth / 2, center_y - boundingRectWidth / 2, boundingRectWidth, boundingRectWidth);

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <opencv_storage>
 <cam_id>/dev/video0</cam_id>
-<exposure_time>10000</exposure_time>
+<exposure_time>100000</exposure_time>
 <video_path>"1.MP4"</video_path>
 <real_width>50</real_width>
 <Camera_Matrix type_id="opencv-matrix">

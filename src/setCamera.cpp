@@ -3,14 +3,10 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <termios.h>
-#include <errno.h>
 #include <linux/videodev2.h>
 #include "setCamera.hpp"
 
-#define DEBUG
+//#define DEBUG
 //#define USE_VIDEO
 
 bool cameraDriver::openCamera(cv::VideoCapture &capture)
